@@ -30,12 +30,8 @@ export default function HomeScreen() {
               });
             }
           }}
-          textInputProps={{
-            onChangeText: (text) => console.log('Searching for:', text)
-          }}
           onFail={(error) => {
             console.error('Error:', error);
-            console.log('Using API Key:', GOOGLE_API_KEY);
           }}
           onNotFound={() => console.log('No results found')}
           query={{
@@ -50,15 +46,31 @@ export default function HomeScreen() {
               width: '100%',
               zIndex: 1,
             },
-            textInput: styles.searchInput,
+            textInput: {
+              ...styles.searchInput,
+              backgroundColor: '#1c1c1e',
+              color: '#ffffff',
+              borderColor: '#2c2c2e',
+            },
             listView: {
               ...styles.listView,
+              backgroundColor: '#1c1c1e',
               position: 'absolute',
               top: 45,
               width: '100%',
             },
-            row: styles.row,
-            description: styles.description,
+            row: {
+              ...styles.row,
+              backgroundColor: '#1c1c1e',
+            },
+            description: {
+              ...styles.description,
+              color: '#ffffff',
+            },
+            separator: {
+              height: 1,
+              backgroundColor: '#2c2c2e',
+            },
           }}
           enablePoweredByContainer={false}
           minLength={2}
@@ -98,13 +110,13 @@ const styles = StyleSheet.create({
   searchContainer: {
     position: 'absolute',
     width: '90%',
-    top: 50,
+    top: 70,
     alignSelf: 'center',
     zIndex: 1,
   },
   searchInput: {
-    height: 45,
-    fontSize: 16,
+    height: 55,
+    fontSize: 20,
     backgroundColor: 'white',
     borderRadius: 10,
     paddingHorizontal: 15,
@@ -117,7 +129,7 @@ const styles = StyleSheet.create({
   listView: {
     backgroundColor: 'white',
     borderRadius: 10,
-    marginTop: 5,
+    marginTop: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
