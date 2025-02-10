@@ -1,47 +1,88 @@
-import { StyleSheet, TextInput, Dimensions } from "react-native";
-import { useState } from "react";
-import MapView from "react-native-maps";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import 'react-native-get-random-values';
+import React, { useState } from 'react';
+import { StyleSheet, View, Dimensions } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { GOOGLE_API_KEY } from '@env';
 
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedView } from '@/components/ThemedView';
 
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
+console.log('API Key:', GOOGLE_API_KEY);
 
 export default function HomeScreen() {
-  // UT Austin coordinates
-  const utAustinRegion = {
-    latitude: 30.2849,
-    longitude: -97.7341,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  };
-
-  const [searchText, setSearchText] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   return (
     <ThemedView style={styles.container}>
-      <GooglePlacesAutocomplete
-        placeholder="Search"
-        onPress={(data, details = null) => {
-          console.log(data, details);
+      <View style={styles.searchContainer}>
+        <GooglePlacesAutocomplete
+          placeholder='Search for a place'
+          fetchDetails={true}
+          onPress={(data, details = null) => {
+            console.log('Selected:', { data, details });
+            if (details?.geometry?.location) {
+              setSelectedLocation({
+                latitude: details.geometry.location.lat,
+                longitude: details.geometry.location.lng,
+              });
+            }
+          }}
+          textInputProps={{
+            onChangeText: (text) => console.log('Searching for:', text)
+          }}
+          onFail={(error) => {
+            console.error('Error:', error);
+            console.log('Using API Key:', GOOGLE_API_KEY);
+          }}
+          onNotFound={() => console.log('No results found')}
+          query={{
+            key: GOOGLE_API_KEY,
+            language: 'en',
+            components: 'country:us',
+          }}
+          styles={{
+            container: {
+              flex: 0,
+              position: 'absolute',
+              width: '100%',
+              zIndex: 1,
+            },
+            textInput: styles.searchInput,
+            listView: {
+              ...styles.listView,
+              position: 'absolute',
+              top: 45,
+              width: '100%',
+            },
+            row: styles.row,
+            description: styles.description,
+          }}
+          enablePoweredByContainer={false}
+          minLength={2}
+          debounce={200}
+        />
+      </View>
+      <MapView 
+        style={styles.map}
+        initialRegion={{
+          latitude: 30.2849,
+          longitude: -97.7341,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
         }}
-        query={{
-          key: "AIzaSyC0FdW0B5CE6hdM1sC6BCwUwpl5tFL949s",
-          language: "en",
-        }}
-        styles={{
-          textInputContainer: styles.searchBar,
-        }}
-      />
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Where to?"
-        value={searchText}
-        placeholderTextColor="gray"
-        onChangeText={setSearchText}
-      />
-      <MapView style={styles.map} initialRegion={utAustinRegion} />
+        region={selectedLocation ? {
+          ...selectedLocation,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        } : undefined}
+      >
+        {selectedLocation && (
+          <Marker coordinate={selectedLocation} />
+        )}
+      </MapView>
     </ThemedView>
   );
 }
@@ -51,20 +92,43 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
-  searchBar: {
-    position: "absolute",
-    top: "7.5%",
-    left: 20,
-    right: 20,
+  searchContainer: {
+    position: 'absolute',
+    width: '90%',
+    top: 50,
+    alignSelf: 'center',
     zIndex: 1,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 10,
-    elevation: 5,
+  },
+  searchInput: {
     height: 45,
-    color: "black",
+    fontSize: 16,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  listView: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    marginTop: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  row: {
+    padding: 13,
+    minHeight: 44,
+  },
+  description: {
+    fontSize: 15,
   },
 });
