@@ -1,19 +1,39 @@
 import 'react-native-get-random-values';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { GOOGLE_API_KEY } from '@env';
+import * as Location from 'expo-location';
 
 import { ThemedView } from '@/components/ThemedView';
 
-console.log('API Key:', GOOGLE_API_KEY);
 
 export default function HomeScreen() {
   const [selectedLocation, setSelectedLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
 
   return (
     <ThemedView style={styles.container}>
@@ -38,6 +58,11 @@ export default function HomeScreen() {
             key: GOOGLE_API_KEY,
             language: 'en',
             components: 'country:us',
+            location: userLocation 
+              ? `${userLocation.latitude},${userLocation.longitude}`
+              : undefined,
+            rankby: 'distance',
+            radius: 10000,
           }}
           styles={{
             container: {
@@ -93,6 +118,13 @@ export default function HomeScreen() {
       >
         {selectedLocation && (
           <Marker coordinate={selectedLocation} />
+        )}
+        {userLocation && (
+          <Marker 
+            coordinate={userLocation}
+            pinColor="blue"
+            title="You are here"
+          />
         )}
       </MapView>
     </ThemedView>
