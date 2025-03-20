@@ -1,7 +1,7 @@
 import "react-native-get-random-values";
 import React, { useState } from "react";
 import { StyleSheet, View, Dimensions, Button } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { GOOGLE_API_KEY } from "@env";
 import ors from "../../api/ors";
@@ -19,6 +19,8 @@ export default function HomeScreen() {
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [polylineShowing, setPolylineShowing] = useState(false);
+  const [polylineCoords, setPolylineCoords] = useState<Coords[]>([]);
 
   return (
     <ThemedView style={styles.container}>
@@ -32,6 +34,10 @@ export default function HomeScreen() {
                 latitude: details.geometry.location.lat,
                 longitude: details.geometry.location.lng,
               });
+              //on press, we probably want to also open a little drawer at the bottom
+              // this will be an info card for the locaton
+              //then we need some top menu to show up where you can choose starting location and it pulls up the polyline
+              
             }
             console.log("Latitude:", selectedLocation?.latitude);
             console.log("Longitude:", selectedLocation?.longitude);
@@ -42,7 +48,7 @@ export default function HomeScreen() {
           }}
           onNotFound={() => console.log("No results found")}
           query={{
-            key: GOOGLE_API_KEY,
+            key: process.env.GOOGLE_API_KEY,
             language: "en",
             components: "country:us",
           }}
@@ -71,7 +77,24 @@ export default function HomeScreen() {
       <View style={{position: "absolute", top: 150, zIndex: 2, backgroundColor: 'blue'}}>
         <Button 
           title="hello"
-          onPress={() => getDirections({latitude: 30.2672, longitude: -97.743}, {latitude: 30.2672, longitude: -97.745})}/>
+          onPress={async () => { 
+            try { 
+              // 30.287797840454136, -97.74201103609765 - cvs lat long
+              // 30.286313593166934, -97.73711485283296 - gdc lat long
+              // 30.283064377410753, -97.73785341695124 - pcl lat long
+              // 30.28577504002564, -97.74025131858313 - fac lat long
+              // 30.286735068968536, -97.7395040630207 - turtle pond lat long
+              const routeCoords = await getDirections({latitude: 30.285112345373594, longitude: -97.7406639158531}, 
+                                                      {latitude: 30.286313593166934, longitude: -97.73711485283296});
+              setPolylineCoords(routeCoords);
+              setPolylineShowing(true);
+            } catch (error) {
+              console.error('Error fetching polyline');
+            }
+            
+
+          }}
+        />
       </View>
       <MapView
         style={styles.map}
@@ -91,6 +114,7 @@ export default function HomeScreen() {
             : undefined
         }
       >
+        {polylineShowing && <Polyline coordinates={polylineCoords} strokeColor="red" strokeWidth={6} />}
         {selectedLocation && <Marker coordinate={selectedLocation} />}
       </MapView>
     </ThemedView>

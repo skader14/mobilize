@@ -10,6 +10,12 @@ interface ResponseCoords {
     latitude: number
 }
 
+/**
+ * Gets the directions
+ * @param origin - longitude and latitude of starting location for directions
+ * @param destination - longitude and latitude of ending location for directions
+ * @returns An array of ResponseCoords objects, containing longitude and latitude
+ */
 export const getDirections = async (
     origin: SendCoords,
     destination: SendCoords) => { //: Promise<ResponseCoords[]>
@@ -18,11 +24,12 @@ export const getDirections = async (
         const response = await orsApi.get(url);
         
         const polylineCoords = response.data.features[0].geometry.coordinates;
-        const finalReturnCoords = polylineCoords.map(([longitude, latitude]: [number, number]) => ({
+        
+        const polylineCoordsFormatted = polylineCoords.map(([longitude, latitude]: [number, number]) => ({
             longitude, latitude
         }));
-        console.log(finalReturnCoords);
-        return response
+        console.log("polylineCoordsFormatted: ", polylineCoordsFormatted);
+        return polylineCoordsFormatted
     } catch (error) {
         console.error("Error fetching route", error);
     }
