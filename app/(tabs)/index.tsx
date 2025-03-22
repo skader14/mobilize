@@ -5,7 +5,7 @@ import MapView, { Marker, Polyline } from "react-native-maps";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { GOOGLE_API_KEY } from "@env";
 import ors from "../../api/ors";
-import { getDirections } from "@/api/openRouteServiceFunctions";
+import { getDirections, getDirectionsOptions } from "@/api/openRouteServiceFunctions";
 
 import { ThemedView } from "@/components/ThemedView";
 
@@ -84,7 +84,7 @@ export default function HomeScreen() {
               // 30.283064377410753, -97.73785341695124 - pcl lat long
               // 30.28577504002564, -97.74025131858313 - fac lat long
               // 30.286735068968536, -97.7395040630207 - turtle pond lat long
-              const routeCoords = await getDirections({latitude: 30.285112345373594, longitude: -97.7406639158531}, 
+              const routeCoords = await getDirections({latitude: 30.287797840454136, longitude:  -97.74201103609765}, 
                                                       {latitude: 30.286313593166934, longitude: -97.73711485283296});
               setPolylineCoords(routeCoords);
               setPolylineShowing(true);
@@ -93,6 +93,21 @@ export default function HomeScreen() {
             }
             
 
+          }}
+        />
+      </View>
+      <View style={{position: "absolute", top: 150, right: 0, zIndex: 2, backgroundColor: 'red'}}>
+        <Button
+          title="post for route"
+          onPress={async() => {
+            try {
+              const routeCoords = await getDirectionsOptions({latitude: 30.287797840454136, longitude:  -97.74201103609765}, 
+                                                              {latitude: 30.286313593166934, longitude: -97.73711485283296});
+              setPolylineCoords(routeCoords);
+              setPolylineShowing(true);
+            } catch (error) {
+              console.error('post for route errror');
+            }
           }}
         />
       </View>
