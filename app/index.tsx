@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import MapView, { Polygon } from 'react-native-maps';
+import MapView, { Marker, Polygon, Polyline } from 'react-native-maps';
 import useMapStore from '@/stores/useMapStore';
 import useReportStore from '@/stores/useReportStore';
 import { listenToAvoidancePolygons } from '@/api/reports';
-import ReportOverlay from '../../components/ReportOverlay';
+import ReportOverlay from '../components/ReportOverlay';
 
 const MapScreen = () => {
     const { 
@@ -61,7 +61,8 @@ const MapScreen = () => {
                     latitudeDelta: 0.0922,
                     longitudeDelta: 0.0421,
                 }}
-                
+                mapType='standard'
+                showsUserLocation={true}
             >
                 {avoidancePolygons.map((polygon, idx) => (
                     <Polygon
@@ -72,13 +73,17 @@ const MapScreen = () => {
                         strokeWidth={3}
                     />
                 ))}
-                {drawing && drawnPolygon.length > 2 && 
-                <Polygon 
+                {drawing && 
+                <Polyline 
                     coordinates={drawnPolygon}
                     fillColor="rgba(0,255,0,0.3)"
                     strokeColor="green"
-                    strokeWidth={2}
+                    strokeWidth={5}
+                    lineCap='square'
                     />
+                }
+                {drawing && drawnPolygon.length > 0 &&
+                    drawnPolygon.map((point, idx) => (<Marker coordinate={point} key={`point ${idx}`}/>))
                 }
             </MapView>
             {/* Floating Action Buttons to move between navigation, reporting, and home */}

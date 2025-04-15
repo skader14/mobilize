@@ -13,6 +13,7 @@ type ReportStore = {
     removeLastPoint: () => void;
     clearPolygon: () => void;
     setDescription: (desc: string) => void;
+    setDrawnPolygon: (polygon: LatLng[]) => void;
 }
 
 const useReportStore = create<ReportStore> ((set) => ({
@@ -30,7 +31,7 @@ const useReportStore = create<ReportStore> ((set) => ({
     })),
     clearPolygon: () => set({ drawnPolygon: []}),
     setDescription: (desc) => set({ description: desc }),
-
+    setDrawnPolygon: (polygon) => set({ drawnPolygon: polygon}),
 }));
 
 export default useReportStore;

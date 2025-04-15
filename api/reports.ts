@@ -20,4 +20,8 @@ export const listenToAvoidancePolygons = (
     });
 };
 
+export const submitAvoidancePolygon = () => {
+    
+}
+
 

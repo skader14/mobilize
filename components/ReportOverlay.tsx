@@ -2,6 +2,8 @@ import useReportStore from "@/stores/useReportStore";
 import useMapStore from "@/stores/useMapStore";
 import { Entypo, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { View, StyleSheet, TouchableOpacity, Text, Button } from "react-native";
+import { router } from "expo-router";
+import { processDrawnPolygon } from "@/utils/processPolygon";
 
 
 
@@ -13,7 +15,8 @@ const ReportOverlay: React.FC = () => {
         addPoint, 
         removeLastPoint, 
         clearPolygon, 
-        setDescription 
+        setDescription,
+        setDrawnPolygon,
     } = useReportStore();
 
     const {
@@ -76,7 +79,21 @@ const ReportOverlay: React.FC = () => {
                 <TouchableOpacity style={styles.smallFAB}>
                     <MaterialCommunityIcons name="restart" size={24} color="white" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.smallFAB}>
+                <TouchableOpacity 
+                    style={styles.smallFAB}
+                    onPress={() => {
+                        const { cleaned, error } = processDrawnPolygon(drawnPolygon);
+                        if (error) {
+                            console.warn('polygon invalid');
+                        } else {
+                            console.log('old polygon: ', drawnPolygon)
+                            setDrawnPolygon(cleaned);
+                            
+                            router.push("/ReportSubmitScreen");
+                            console.log("new polygon", drawnPolygon);
+                        }
+                    }}
+                >
                     <MaterialIcons name="check" size={24} color="white" />
                 </TouchableOpacity>
             </View>
@@ -151,15 +168,15 @@ const styles = StyleSheet.create({
     },
     centerMarker: {
         position: 'absolute',
-        top: '40%', // assuming 24x24 icon
+        top: '50%', // assuming 24x24 icon
         left: '50%',
         width: 20,
         height: 20,
         //maybe needed to adjust if it seems off center
-        // transform: [
-        //     {translateX: +12},
-        //     {translateY: -12},
-        // ],
+        transform: [
+            {translateX: +1},
+            {translateY: +6},
+        ],
         borderColor: 'red',
         backgroundColor: 'rgba(255, 0, 0, 0.25)',
         borderRadius: 12,
